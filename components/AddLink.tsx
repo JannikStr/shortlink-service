@@ -9,8 +9,6 @@ import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { DialogTitle } from '@radix-ui/react-dialog';
 import { useToast } from './ui/use-toast';
-import { Tooltip, TooltipProvider } from './ui/tooltip';
-import { TooltipContent, TooltipTrigger } from '@radix-ui/react-tooltip';
 
 export const AddLink = () => {
   const [data, setData] = useState({
@@ -58,18 +56,9 @@ export const AddLink = () => {
   return (
     <Dialog open={showDialog} onOpenChange={setShowDialog}>
       <DialogTrigger className='float-end'>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              <span className='text-3xl'>
-                +
-              </span>
-            </TooltipTrigger>
-            <TooltipContent className='p-1 rounded-md text-sm text-white bg-zinc-800'>
-              <p>Add new short link</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <span className='text-3xl'>
+          +
+        </span>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

@@ -10,13 +10,7 @@ export default function Home() {
   const router = useRouter();
   const { data: session, status } = useSession();
 
-  if(status === 'loading') {
-    return (
-      <div className='text-white w-full'>
-        <h1 className='text-2xl'>Loading...</h1>
-      </div>
-    )
-  } else if(status === 'unauthenticated') {
+  if(status === 'unauthenticated') {
     return router.push('/sign-in')
   }
 
@@ -27,7 +21,7 @@ export default function Home() {
         <div className='w-full'>
           <AddLink />
         </div>
-        <LinkTable userId={session!.user._id}/>
+        <LinkTable userId={session?.user._id}/>
       </div>
     </div>
   )
