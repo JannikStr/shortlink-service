@@ -1,8 +1,11 @@
 'use client';
 
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { Button } from "./ui/button";
 import { Skeleton } from "./ui/skeleton";
+import { DropdownMenu, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { FaMask } from "react-icons/fa";
+import { DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -18,9 +21,19 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="w-full flex justify-end">
+    <nav className="w-full flex justify-end pr-3 pt-2 text-white ">
       { session ? (
-        <Button variant='default'>Sign Out</Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="text-zinc-950" variant="outline"><FaMask /><span className="pl-2">Profile</span></Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-36">
+            <DropdownMenuLabel>Account</DropdownMenuLabel>
+            <DropdownMenuItem>
+              <Button onClick={() => signOut()}>Log Out</Button>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       ) : (
         <Button>Sign In</Button>
       )}

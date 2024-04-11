@@ -8,7 +8,11 @@ import { DialogFooter, DialogHeader, DialogTitle, Dialog, DialogContent, DialogD
 import { useToast } from "./ui/use-toast";
 import { Skeleton } from "./ui/skeleton";
 
-export const LinkTable = ({ userId }: {userId: string|undefined}) => {
+interface LinkTableProps {
+  userId: string|undefined;
+}
+
+export const LinkTable = ({ userId }: LinkTableProps) => {
 
   const [links, setLinks] = useState<LinkDocument[]>([]);
   const { toast } = useToast();
@@ -87,7 +91,14 @@ export const LinkTable = ({ userId }: {userId: string|undefined}) => {
   )
 }
 
-function LinkTableBody({ userId, linkData, setShowDelete, setTagToDelete }: { userId: string|undefined, linkData: LinkDocument[], setShowDelete: (val: boolean) => void, setTagToDelete: (tag: string) => void }) {
+interface LinkTableBodyProps {
+ userId: string|undefined;
+  linkData: LinkDocument[];
+  setShowDelete: (val: boolean) => void;
+  setTagToDelete: (tag: string) => void;
+}
+
+function LinkTableBody({ userId, linkData, setShowDelete, setTagToDelete }: LinkTableBodyProps) {
   if(userId) {
     return (
       <TableBody>

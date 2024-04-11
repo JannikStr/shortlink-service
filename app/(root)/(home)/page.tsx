@@ -2,16 +2,35 @@
 
 import { AddLink } from '@/components/AddLink';
 import { LinkTable } from '@/components/LinkTable';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import React from 'react'
 
 export default function Home() {
-  const router = useRouter();
   const { data: session, status } = useSession();
 
   if(status === 'unauthenticated') {
-    return router.push('/sign-in')
+    return (
+      <div className='text-white w-full text-center items-center mt-[200px]'>
+        <div className='text-center'>
+          <Link href="/sign-up">
+            <div className='rounded-md border-white border-2 bg-zinc-900 w-36 m-auto h-8 hover:bg-zinc-800'>
+              Sign Up
+            </div>
+          </Link>
+          <Link href="/sign-in">
+            <div className='rounded-md border-white border-2 bg-zinc-900 w-36 m-auto h-8 mt-3 hover:bg-zinc-800'>
+              Sign In
+            </div>
+          </Link>
+        </div>
+      </div>
+    )
+  } else if(status === 'loading') {
+    return (
+      <></>
+    )
   }
 
   return (
