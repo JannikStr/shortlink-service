@@ -1,7 +1,6 @@
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
 import { compare } from "bcrypt";
-import mongoose from "mongoose";
 import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials";
 

@@ -1,12 +1,27 @@
 import { connectDB } from "@/lib/mongodb";
 import Link from "@/models/Link";
+import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
+import { options } from "../auth/[...nextauth]/options";
 
 export async function GET() {
   try{
     await connectDB();
 
-    const data = await Link.find({});
+    const session = await getServerSession(options);
+
+    if(!session) {
+      return NextResponse.json({
+        'message': 'Error not authenticated'
+      }, {
+        status: 403
+      });
+    }
+
+    const data = await Link.find({
+      creator_id: session?.user._id,
+    });
+
     return NextResponse.json(data, { status: 200 });
   } catch(error) {
     console.error(error);
@@ -22,6 +37,16 @@ export async function POST(request: Request) {
   const body = await request.json();
   const { tag, url, description } = body;
 
+  const session = await getServerSession(options);
+
+  if(!session) {
+    return NextResponse.json({
+      'message': 'You must be logged in'
+    }, {
+      status: 403
+    });
+  }
+
   const foundLink = await Link.findOne({
     tag: tag
   });
@@ -36,6 +61,7 @@ export async function POST(request: Request) {
     tag,
     url,
     description,
+    creator_id: session.user._id,
   });
 
   await newLink.save();

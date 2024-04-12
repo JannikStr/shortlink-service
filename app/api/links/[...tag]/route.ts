@@ -1,6 +1,8 @@
 import { connectDB } from "@/lib/mongodb";
 import Link from "@/models/Link";
+import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
+import { options } from "../../auth/[...nextauth]/options";
 
 export async function GET(request: NextRequest, { params }: { params: { tag: string } }) {
   const tag = params.tag;
@@ -28,11 +30,21 @@ export async function GET(request: NextRequest, { params }: { params: { tag: str
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { tag; string }}) {
+export async function DELETE(request: NextRequest, { params }: { params: { tag: string }}) {
   const tag = params.tag;
-  
+
   try {
     await connectDB();
+
+    const session = await getServerSession(options);
+
+    if(!session) {
+      return NextResponse.json({
+        'message': 'Not authenticated',
+      }, {
+        status: 403,
+      });
+    }
 
     const foundLink = await Link.findOne({
       tag: tag
@@ -48,6 +60,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { tag; 
 
     await Link.findOneAndDelete({
       _id: foundLink._id,
+      creator_id: session.user._id,
     });
 
     return NextResponse.json({

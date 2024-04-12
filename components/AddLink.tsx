@@ -1,5 +1,3 @@
-'use client';
-
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from './ui/dialog'
 import { Label } from './ui/label';
@@ -10,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { DialogTitle } from '@radix-ui/react-dialog';
 import { useToast } from './ui/use-toast';
 
-export const AddLink = () => {
+export const AddLink = ({ updateLinks }: { updateLinks: () => void }) => {
   const [data, setData] = useState({
     tag: '',
     description: '',
@@ -46,7 +44,7 @@ export const AddLink = () => {
     });
     setError('');
     setShowDialog(false);
-
+    updateLinks();
     toast({
       title: 'New link Created',
       description: `New short link created: ${process.env.NEXTAUTH_URL!}/${responseData.tag}`,

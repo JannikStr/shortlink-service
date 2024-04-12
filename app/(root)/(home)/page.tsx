@@ -2,13 +2,28 @@
 
 import { AddLink } from '@/components/AddLink';
 import { LinkTable } from '@/components/LinkTable';
-import { Skeleton } from '@/components/ui/skeleton';
+import { LinkDocument } from '@/models/Link';
 import { useSession } from 'next-auth/react'
 import Link from 'next/link';
-import React from 'react'
+import React, { useState } from 'react'
 
 export default function Home() {
   const { data: session, status } = useSession();
+
+  const [links, setLinks] = useState<LinkDocument[]>([]);
+
+  const updateLinks = async () => {
+    const response = await fetch('/api/links', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if(!response.ok) return;
+
+    const data = await response.json();
+    setLinks(data);
+  }
 
   if(status === 'unauthenticated') {
     return (
@@ -38,9 +53,9 @@ export default function Home() {
       <h1 className='text-2xl'>Your links</h1>
       <div className='text-center items-center mx-auto w-[80%]'>
         <div className='w-full'>
-          <AddLink />
+          <AddLink updateLinks={updateLinks} />
         </div>
-        <LinkTable userId={session?.user._id}/>
+        <LinkTable userId={session?.user._id} links={links} updateLinks={updateLinks} />
       </div>
     </div>
   )

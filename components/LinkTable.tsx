@@ -8,31 +8,23 @@ import { DialogFooter, DialogHeader, DialogTitle, Dialog, DialogContent, DialogD
 import { useToast } from "./ui/use-toast";
 import { Skeleton } from "./ui/skeleton";
 
+/*
+ * Update when editing, adding or deleting link
+ */
+
 interface LinkTableProps {
   userId: string|undefined;
+  links: LinkDocument[];
+  updateLinks: () => void;
 }
 
-export const LinkTable = ({ userId }: LinkTableProps) => {
+export const LinkTable = ({ userId, links, updateLinks }: LinkTableProps) => {
 
-  const [links, setLinks] = useState<LinkDocument[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchLinks = async () => {
-      const response = await fetch('/api/links', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      if(!response.ok) {
-        return;
-      }
-      const data = await response.json();
-      setLinks(data);
-    }
-    fetchLinks();
-  }, []);
+    updateLinks();
+  }, [updateLinks]);
 
   const [showDelete, setShowDelete] = useState(false);
   const [tagToDelete, setTagToDelete] = useState('');
@@ -54,6 +46,7 @@ export const LinkTable = ({ userId }: LinkTableProps) => {
       title: 'Successfully deleted short link',
       description: `Short link with tag "${tagToDelete}" has been deleted`
     });
+    updateLinks();
     setShowDelete(false);
     setTagToDelete('');
   }
