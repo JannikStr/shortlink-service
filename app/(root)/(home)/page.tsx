@@ -52,7 +52,7 @@ export default function Home() {
 
   return (
     <div className='text-white w-full text-center items-center mt-[100px]'>
-      <h1 className='text-2xl'>Your links</h1>
+      <h1 className='text-3xl'>Links created by you</h1>
       <div className='text-center items-center mx-auto w-[80%]'>
         <div className='w-full'>
           <AddLink updateLinks={updateLinks} />
