@@ -1,16 +1,15 @@
 import Link from "next/link";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
-import { useEffect, useState } from "react";
+import { Table, TableHead, TableHeader, TableRow } from "./ui/table";
+import { useState } from "react";
 import { LinkDocument } from "@/models/Link";
 import { Button } from "./ui/button";
-import { FaPencilAlt, FaRegTrashAlt } from 'react-icons/fa';
 import { DialogFooter, DialogHeader, DialogTitle, Dialog, DialogContent, DialogDescription } from "./ui/dialog";
 import { useToast } from "./ui/use-toast";
-import { Skeleton } from "./ui/skeleton";
-
-/*
- * Update when editing, adding or deleting link
- */
+import LinkTableBody from "./LinkTableBody";
+import { LinkDataProps } from "@/lib/interfaces";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
 
 interface LinkTableProps {
   userId: string|undefined;
@@ -22,12 +21,15 @@ export const LinkTable = ({ userId, links, updateLinks }: LinkTableProps) => {
 
   const { toast } = useToast();
 
-  useEffect(() => {
-    updateLinks();
-  }, [updateLinks]);
-
   const [showDelete, setShowDelete] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [tagToDelete, setTagToDelete] = useState('');
+  const [editData, setEditData] = useState<LinkDataProps>({
+    tag: '',
+    description: '',
+    url: '',
+  })
+  const [error, setError] = useState("");
 
   const deleteLink = async () => {
     const response = await fetch(`/api/links/${tagToDelete}`, {
@@ -51,6 +53,54 @@ export const LinkTable = ({ userId, links, updateLinks }: LinkTableProps) => {
     setTagToDelete('');
   }
 
+  const initShowEditDialog = (shortlink: LinkDocument) => {
+    setShowEditDialog(true);
+    setEditData({
+      tag: shortlink.tag,
+      description: shortlink.description,
+      url: shortlink.url,
+    })
+  }
+
+  const submitEditData = async () => {
+    if(editData.tag.trim() === '' || editData.description.trim() === '' || editData.url.trim() === '') {
+      setError("Fields cannot be empty");
+      return;
+    }
+
+    const response = await fetch(`/api/links/${editData.tag}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        description: editData.description,
+        url: editData.url,
+      }),
+    })
+
+    const json = await response.json();
+
+    if(response.ok) {
+      setShowEditDialog(false);
+
+      setEditData({
+        tag: '',
+        description: '',
+        url: ''
+      });
+
+      toast({
+        variant: 'default',
+        description: json.message,
+      });
+      return;
+    }
+
+    setError(json.message);
+
+  }
+
   return (
     <Table>
       <TableHeader>
@@ -61,7 +111,7 @@ export const LinkTable = ({ userId, links, updateLinks }: LinkTableProps) => {
           <TableHead></TableHead>
         </TableRow>
       </TableHeader>
-      <LinkTableBody userId={userId} linkData={links} setShowDelete={setShowDelete} setTagToDelete={setTagToDelete} />
+      <LinkTableBody userId={userId} linkData={links} setShowDelete={setShowDelete} setTagToDelete={setTagToDelete} initShowEditDialog={initShowEditDialog} />
       <Dialog open={showDelete} onOpenChange={setShowDelete}>
         <DialogContent>
           <DialogHeader>
@@ -80,65 +130,33 @@ export const LinkTable = ({ userId, links, updateLinks }: LinkTableProps) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit a link</DialogTitle>
+          </DialogHeader>
+          <div className='grid gap-4 py-4'>
+            <div className={'grid grid-cols-4 items-center gap-4'}>
+              <Label htmlFor='name' className='text-right'>Tag</Label>
+              <Input className='col-span-3' id='name' value={editData.tag} disabled={true} />
+            </div>
+            <div className='grid grid-cols-4 items-center gap-4'>
+              <Label htmlFor='description' className='text-right'>Description</Label>
+              <Textarea className='col-span-3' id='description' value={editData.description} onChange={(e) => setEditData({...editData, description: e.target.value })} />
+            </div>
+            <div className='grid grid-cols-4 items-center gap-4'>
+              <Label htmlFor='url' className='text-right'>URL</Label>
+              <Input className='col-span-3' id='url' value={editData.url} onChange={(e) => setEditData({...editData, url: e.target.value })} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button className='text-right' onClick={submitEditData} variant="outline">
+              Update
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Table>
   )
 }
 
-interface LinkTableBodyProps {
- userId: string|undefined;
-  linkData: LinkDocument[];
-  setShowDelete: (val: boolean) => void;
-  setTagToDelete: (tag: string) => void;
-}
-
-function LinkTableBody({ userId, linkData, setShowDelete, setTagToDelete }: LinkTableBodyProps) {
-  if(userId) {
-    return (
-      <TableBody>
-        {linkData.map((shortlink) => (
-          <LinkTableRow key={shortlink.tag} shortlink={shortlink} setShowDelete={setShowDelete} setTagToDelete={setTagToDelete} />
-        ))
-        }
-      </TableBody>
-    )
-  }
-  return (
-    <TableBody>
-      <LinkTableRow shortlink={undefined} setShowDelete={setShowDelete} setTagToDelete={setTagToDelete} />
-    </TableBody>
-  )
-}
-
-interface LinkTableRowProps {
-  shortlink: LinkDocument|undefined;
-  setShowDelete: (visible: boolean) => void;
-  setTagToDelete: (tag: string) => void;
-}
-
-function LinkTableRow({ shortlink = undefined, setShowDelete = (_) => {}, setTagToDelete = (_) => {} }: LinkTableRowProps) {
-  if(shortlink) {
-    return (
-      <TableRow>
-        <TableCell className="text-left font-medium">{shortlink.tag}</TableCell>
-        <TableCell className="text-left">{shortlink.description}</TableCell>
-        <TableCell className="text-left w-[20%]">
-          <Link href={shortlink.url} className="text-blue-300 hover:underline">
-            {shortlink.url.length > 25 ? shortlink.url.substring(0, 25) + '...' : shortlink.url}
-          </Link>
-        </TableCell>
-        <TableCell className="text-right">
-          <Button variant='link' className="text-white hover:text-yellow-400"><FaPencilAlt /></Button>
-          <Button variant='link' className="text-white hover:text-red-400"><FaRegTrashAlt onClick={() => { setShowDelete(true); setTagToDelete(shortlink.tag); }} /></Button>
-        </TableCell>
-      </TableRow>
-    )
-  }
-  return (
-    <TableRow>
-      <TableCell className="text-left font-medium"><Skeleton className="h-2 w-full opacity-25" /></TableCell>
-      <TableCell className="text-left"><Skeleton className="h-2 w-full opacity-25" /></TableCell>
-      <TableCell className="text-left w-[20%]"><Skeleton className="h-2 w-full opacity-25" /></TableCell>
-      <TableCell className="text-left"><Skeleton className="h-2 w-full opacity-25" /></TableCell>
-    </TableRow>
-  )
-}

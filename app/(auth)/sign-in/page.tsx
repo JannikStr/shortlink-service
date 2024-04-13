@@ -1,6 +1,7 @@
 'use client';
 import { signIn } from 'next-auth/react';
 import Image from 'next/image'
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { FormEvent, useState } from 'react'
 
@@ -69,8 +70,9 @@ export default function SignInPage() {
             </div>
           </div>
 
-          <div>
+          <div className='text-center'>
             <button type="submit" className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Sign In</button>
+            <span className='text-zinc-400 text-sm'>Don&apos;t have an account yet? Register <Link href="/sign-up" className='text-blue-200 underline'>here</Link></span>
           </div>
         </form>
       </div>

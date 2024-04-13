@@ -2,8 +2,9 @@
 
 import { signIn } from "next-auth/react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, FormEventHandler, useState } from "react";
+import { FormEvent, useState } from "react";
 
 export default function SignUpPage() {
 
@@ -100,8 +101,9 @@ export default function SignUpPage() {
             </div>
           </div>
 
-          <div>
+          <div className="text-center">
             <button type="submit" className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Sign Up</button>
+            <span className='text-zinc-400 text-sm'>Already have an account? Sign in <Link href="/sign-in" className='text-blue-200 underline'>here</Link></span>
           </div>
         </form>
       </div>
